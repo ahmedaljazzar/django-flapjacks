@@ -1,6 +1,13 @@
 # project files and folders
-.idea/
 db.sqlite3
+.idea/
+*.zip
+
+# Terraform Files
+*.tfh
+.terraform/
+.terraform*
+terraform.tfstate*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
