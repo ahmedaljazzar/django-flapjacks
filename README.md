@@ -6,13 +6,14 @@ the bandwidth cost once needed.
 
 ## The Infrastructure needed
 
-This software heavily relies on infrastructure, so in case to avoid
-creating things or modifying them mistakenly, we are going to install
-[Terraform](https://www.terraform.io) as described
-[here](https://www.terraform.io/intro/getting-started/install.html) and
-to use its help to manage it.
+This software heavily relies on infrastructure, so to avoid
+creating things or modifying them mistakenly, we are going to automate 
+the process of setting this infrastructure up using
+[Terraform](https://www.terraform.io) which can installed from
+[here](https://www.terraform.io/intro/getting-started/install.html)..
 
-From AWS, we are going to use the following services:
+From AWS, Terraform is going to use the following services:
+- AWS [IAM](https://aws.amazon.com/iam/).
 - AWS [S3](https://console.aws.amazon.com/s3/home) bucket:
     * The same bucket your machine is uploading videos to.
 - AWS [SNS](https://console.aws.amazon.com/sns): Amazon Simple
@@ -43,10 +44,12 @@ to subscribe or request notifications.
     >   - {ROOT_PATH} points to the dir you are uploading files into.
     >   - {OUTPUT_KEY_PREFIX} is the same as it's in the settings files.
 
-- Youtube (Optional):
-    - Needs a client secret file.
-    - Needs also an oauth2 file to allow the Lambda uploading to
-    Youtube without the user interactions.
+
+In order to use Yotube deployment feature, you need
+
+- A client secret file.
+- An oauth2 file to allow the Lambda uploading to Youtube without 
+the user interactions.
 
     > IMPORTANT: Keep your oauth2 file in a safe place and give it
     the sufficient permissions no more!
