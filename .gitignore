@@ -4,10 +4,14 @@ db.sqlite3
 *.zip
 
 # Terraform Files
-*.tfh
+variables.tf
 .terraform/
 .terraform*
 terraform.tfstate*
+
+# OS Related Filess
+.DS_Store
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

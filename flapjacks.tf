@@ -1,13 +1,16 @@
 provider "aws" {
-  access_key = "${var.ACCESS_KEY}"
-  secret_key = "${var.SECRET_KEY}"
+  access_key = "${var.AWS_ACCESS_KEY}"
+  secret_key = "${var.AWS_SECRET_KEY}"
   region = "${var.BUCKET_REGION}"
 }
 
-// Creating and configuring the base bucket
+// Creating and configuring the buckets
 resource "aws_s3_bucket" "flapjacks_bucket" {
   bucket = "${var.BUCKET_NAME}"
   acl = "public-read"
+}
+resource "aws_s3_bucket" "flapjacks_private_bucket" {
+  bucket = "${var.PRIVATE_BUCKET_NAME}"
 }
 
 // Creating an SNS topic to manage the notifications
@@ -366,19 +369,40 @@ resource "aws_elastictranscoder_pipeline" "flapjacks_transcoder" {
   }
 }
 
+
+resource "aws_s3_bucket_object" "object" {
+  bucket = "${aws_s3_bucket.flapjacks_private_bucket.id}"
+  key    = "${var.LAMBDA_FILE_KEY}"
+  source = "${var.LAMBDA_FILE_NAME}"
+  etag   = "${md5(file("${var.LAMBDA_FILE_NAME}"))}"
+}
+
 // Createing Lambda function
 resource "aws_lambda_function" "flapjacks_lambda_function" {
+  s3_bucket = "${aws_s3_bucket.flapjacks_private_bucket.bucket}"
+  s3_key = "${var.LAMBDA_FILE_KEY}"
+
   function_name = "${var.LAMBDA_FUNCTION_NAME}"
-  handler = "lambda_function.lambda_handler"
-  filename = "lambda_function.zip"
+  handler = "${var.FUNCTION_HANDLER}"
   role = "${aws_iam_role.flapjacks_lambda_default_role.arn}"
   runtime = "python3.6"
-  timeout = 8
+  timeout = 30
+  publish = true
+
+  depends_on = ["aws_s3_bucket_object.object"]
 
   // TODO: Memory and timeout for youtube
   // TODO: VPC
   // TODO: source_code_hash = "${base64sha256(file("lambda_function.zip"))}"
 }
+
+resource "aws_lambda_alias" "flapjacks_lambda_alias" {
+    name = "Version_${aws_lambda_function.flapjacks_lambda_function.version}"
+    description = "${var.VERSION_DESCRIPTION}"
+    function_name = "${aws_lambda_function.flapjacks_lambda_function.arn}"
+    function_version = "${aws_lambda_function.flapjacks_lambda_function.version}"
+}
+
 
 // Adding execution permissions to the functions
 resource "aws_lambda_permission" "flapjacks_allow_bucket" {
